@@ -37,18 +37,22 @@ for i in range(n):
             .replace("'", "")\
             .replace(":", "")\
             .replace("mint", "")\
-            .replace("...", "").replace("|", ",")
-
+            .replace("...", "")\
+            .replace("|", ",")\
+            .replace("‘", "")\
+            .replace("—", ":")\
+            .replace("’", "")
 
         image_tag = article.find('img', {"class": ["msvBD", "zC7z7b"]})
         if image_tag:
             image_url = image_tag['src']
         blob = TextBlob(headline)
         sentiment = blob.sentiment
+        subjectivity = str(sentiment)
         #MIGRATE::::
         analyzer = SentimentIntensityAnalyzer()
         sentiment_scores = analyzer.polarity_scores(headline)
-        sentiment = sentiment_scores['compound']
+        sentiment = sentiment_scores['compound'], " - ", subjectivity
         sentiments.append(
             {
                 'who': image_url, # who posted the article?
@@ -64,7 +68,7 @@ print("total number of articles examined: ", count)
 wb = openpyxl.Workbook()
 sheet = wb.active
 sheet.title = "Data"
-headers = ["who", "headline", "sentiment"]
+headers = ["who", "headline", "polarity", "subjectivity"]
 sheet.append(headers)
 
 for content in sentiments:
@@ -80,10 +84,12 @@ for content in sentiments:
         sheet.add_image(img_cell, f"A{sheet.max_row+1}")
     else:
         print("Image download failed :(")
+    sindex = str(content['sentiment'][2]).index(",")+15
     sheet.append([
         content['who'],
         content['headline'],
-        str(content['sentiment'])
+        str(content['sentiment'][0]),
+        str(content['sentiment'][2])[sindex:-1]
     ])
 
 wb.save("data_with_images.xlsx")
