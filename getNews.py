@@ -11,7 +11,7 @@ from PIL import Image
 from io import BytesIO
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-search_terms = ["Congress elections", "2024 Polls Conrgess", "INC Elections"]
+search_terms = ["Congress elections 2024", "2024 Polls Conrgess", "INC Elections 2024"]
 driver = webdriver.Chrome()
 n = len(search_terms) # pages to see :)
 count = 0 # just to keep count of how many headlines are fetched :)
@@ -70,8 +70,10 @@ sheet = wb.active
 sheet.title = "Data"
 headers = ["who", "headline", "polarity", "subjectivity"]
 sheet.append(headers)
-
+count = 0
 for content in sentiments:
+    count+=1
+    print("analyzing article: ", count)
     image_url = content["who"]
     response = requests.get(image_url)
     if response.status_code==200:
