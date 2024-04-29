@@ -11,9 +11,9 @@ from PIL import Image
 from io import BytesIO
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-search_term = "Congress elections"
+search_terms = ["Congress elections", "2024 Polls Conrgess", "INC Elections"]
 driver = webdriver.Chrome()
-n = 1 # pages to see :)
+n = len(search_terms) # pages to see :)
 count = 0 # just to keep count of how many headlines are fetched :)
 
 images = {}
@@ -22,8 +22,7 @@ images = {}
 sentiments = []
 
 for i in range(n):
-    start = i * 10
-    driver.get(f"https://news.google.com/search?q={search_term}&hl=en-IN&gl=IN&ceid=IN%3Aen")
+    driver.get(f"https://news.google.com/search?q={search_terms[i]}&hl=en-IN&gl=IN&ceid=IN%3Aen")
     time.sleep(5)
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
@@ -46,21 +45,22 @@ for i in range(n):
         image_tag = article.find('img', {"class": ["msvBD", "zC7z7b"]})
         if image_tag:
             image_url = image_tag['src']
-        blob = TextBlob(headline)
-        sentiment = blob.sentiment
-        subjectivity = str(sentiment)
-        #MIGRATE::::
-        analyzer = SentimentIntensityAnalyzer()
-        sentiment_scores = analyzer.polarity_scores(headline)
-        sentiment = sentiment_scores['compound'], " - ", subjectivity
-        sentiments.append(
-            {
-                'who': image_url, # who posted the article?
-                'headline': headline,
-                'sentiment': sentiment
-            }
-        )
-        count += 1
+        if headline not in (x['headline'] for x in sentiments):
+            blob = TextBlob(headline)
+            sentiment = blob.sentiment
+            subjectivity = str(sentiment)
+            #MIGRATE::::
+            analyzer = SentimentIntensityAnalyzer()
+            sentiment_scores = analyzer.polarity_scores(headline)
+            sentiment = sentiment_scores['compound'], " - ", subjectivity
+            sentiments.append(
+                {
+                    'who': image_url, # who posted the article?
+                    'headline': headline,
+                    'sentiment': sentiment
+                }
+            )
+            count += 1
 
 driver.quit()
 print("total number of articles examined: ", count)
