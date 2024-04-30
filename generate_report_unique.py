@@ -53,7 +53,7 @@ for url, group_df in grouped:
     doc.add_paragraph()
 
     # Add the list of headlines to the Word document as bullet points
-    doc.add_heading('Headlines:', level=2)
+    doc.add_heading(f'Headlines ({len(data)}):', level=2)
     for headline, _, _ in data:
         doc.add_paragraph(headline, style='List Bullet')
 
